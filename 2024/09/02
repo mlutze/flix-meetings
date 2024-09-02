@@ -40,5 +40,8 @@
     - fix field get and field put name reference
     - add sketch for immutable struct
 - fix context in `weeder2.pick` (for new) (jacob)
+- switch to Zulip
+    - 4 Yes
+    - 0 No
 
 ## Action items
