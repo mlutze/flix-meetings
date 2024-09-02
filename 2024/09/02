@@ -8,5 +8,37 @@
 5. Fast set solver and how to merge
 
 ## Attendees
+- Andreas
+- Matt
+- Josept
+- Alexander(?)
+- Magnus
+
+## Notes
+
+- implemented typed ast visitor
+- DeclContext
+    - add more contexts (effects)
+    - add more completers in a single file
+- ci compile with scala 3
+    - hmm
+- remove hard failures from Kinder
+  - just Kind.Error, expect crashes
+- new solver 
+    - dont crash
+    - dont print
+    - too complex nicely
+    - remove comparison code (tied to old solver)
+    - merge bottom up in smaller PRS
+    - fail-slow
+    - progress marking
+- structs
+    - add `mut` (if time permits)
+    - trait based dots (separate java from structs)
+    - dont highlight field type in definition
+    - fix rename field
+    - fix field get and field put name reference
+    - add sketch for immutable struct
+- fix context in `weeder2.pick` (for new) (jacob)
 
 ## Action items
