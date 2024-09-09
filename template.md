@@ -4,4 +4,8 @@
 
 ## Attendees
 
+## Conclusions
+
+## Considerations
+
 ## Action items

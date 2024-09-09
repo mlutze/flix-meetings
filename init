@@ -5,11 +5,11 @@ import os
 
 today = datetime.date.today()
 dirs = today.strftime("%Y/%m")
-file_name = today.strftime("%Y/%m/%d")
+file_name = today.strftime("%Y/%m/%d") + ".md"
 formatted_date = today.strftime("%Y-%m-%d")
 
 with open("template.md") as template_file:
     template = template_file.read()
-    os.makedirs(dirs)
+    os.makedirs(dirs, exist_ok=True)
     with open(file_name, "x") as new_file:
         new_file.write(template.format(date = formatted_date))
