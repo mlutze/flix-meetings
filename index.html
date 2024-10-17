@@ -3,6 +3,185 @@
 <head>
 <script>
 
+TOPIC_WIDTH = 16;
+TIME_WIDTH = 6;
+
+DEFAULT_ALLOCATION = 600;
+
+RUNNINGTIMER = null;
+
+ALLOC_CLASS = "alloc";
+
+function randomId(prefix) {
+    return prefix + Math.floor((Math.random() * 100000));
+}
+
+function moveRowUp(row) {
+    let prev = row.previousElementSibling;
+    if (prev !== null) {
+        prev.before(row);
+    }
+
+}
+
+function moveRowDown(row) {
+    let next = row.nextElementSibling;
+    if (next !== null) {
+        next.after(row);
+    }
+}
+
+function pauseTime() {
+    window.clearInterval(RUNNINGTIMER);
+}
+
+function tick(used) {
+    let usedSecOld = parseTime(used.value);
+    let usedSecNew = usedSecOld + 1;
+    used.value = formatTime(usedSecNew);
+}
+
+function getTotalAlloc() {
+    let allocs = document.getElementsByClassName(ALLOC_CLASS);
+    let sum = 0;
+    for (alloc of allocs) {
+        sum += parseTime(alloc.value);
+    }
+    return sum;
+}
+
+function recalcTotalTime() {
+    let totalAllocSec = getTotalAlloc();
+    document.getElementById("total-allocated").value = formatTime(totalAllocSec);
+}
+
+function recalcTimes(allocated, used, remaining) {
+    let allocSec = parseTime(allocated.value);
+    let usedSec = parseTime(used.value);
+    
+    allocated.value = formatTime(allocSec);
+    used.value = formatTime(usedSec);
+    remaining.value = formatTime(allocSec - usedSec);
+
+    recalcTimes()
+}
+
+function startTime(allocated, used, remaining) {
+    window.clearInterval(RUNNINGTIMER);
+    RUNNINGTIMER = window.setInterval(
+        () => {
+            tick(used);
+            recalcTimes(allocated, used, remaining);
+        },
+        1000
+    );
+}
+
+function parseTime(string) {
+    let parts = string.split(":");
+    if (parts.length == 1) {
+        return parseInt(parts[0] * 60);
+    } else {
+        return parseInt(parts[0]) * 60 + parseInt(parts[1]);
+    }
+}
+
+function formatTime(seconds) {
+    let abs = Math.abs(seconds);
+    let body = "" + Math.floor(abs / 60) + ":" + pad00(abs % 60);
+    if (seconds < 0) {
+        return "-" + body;
+    } else {
+        return body;
+    }
+}
+
+function pad00(n) {
+    if (n < 10) {
+        return "0" + n;
+    } else {
+        return "" + n;
+    }
+}
+
+function addTopic() {
+    let tbody = document.getElementById("tbody");
+    let newRow = makeNewRow();
+    tbody.appendChild(newRow);
+    recalcTotalTime();
+    return newRow;
+}
+
+function addTopicAndFocus() {
+    let newRow = addTopic();
+    newRow.getElementsByTagName("input").item(0).focus();
+}
+
+// returns a new empty row
+function makeNewRow() {
+    let tr = document.createElement("tr");
+    tr.appendChild(makeSimpleTd(makeButton(
+        "–",
+        () => tr.remove()
+    )));
+    tr.appendChild(makeSimpleTd(makeButton(
+        "↑",
+        () => moveRowUp(tr)
+    )));
+    tr.appendChild(makeSimpleTd(makeButton(
+        "↓",
+        () => moveRowDown(tr)
+    )));
+    tr.appendChild(makeInput("", TOPIC_WIDTH));
+
+    let allocated = makeInput(formatTime(DEFAULT_ALLOCATION), TIME_WIDTH);
+    allocated.className = ALLOC_CLASS;
+    let used = makeDisabledInput(formatTime(0), TIME_WIDTH);
+    let remaining = makeDisabledInput(formatTime(DEFAULT_ALLOCATION), TIME_WIDTH);
+
+    allocated.onchange = () => recalcTimes(allocated, used, remaining);
+
+    tr.appendChild(makeSimpleTd(allocated));
+    tr.appendChild(makeSimpleTd(used));
+    tr.appendChild(makeSimpleTd(remaining));
+    tr.appendChild(makeSimpleTd(makeButton("Start", () => startTime(allocated, used, remaining))));
+    tr.appendChild(makeSimpleTd(makeButton("Pause", () => pauseTime())));
+
+    return tr;
+}
+
+function makeSimpleTd(contents) {
+    let td = document.createElement("td");
+    td.appendChild(contents)
+    return td;
+}
+
+function makeButton(text, fun) {
+    let button = document.createElement("button");
+    button.textContent = text;
+    button.onclick = fun;
+    button.tabIndex = "-1";
+    return button
+}
+
+function makeInput(text, width) {
+    let input = document.createElement("input");
+    input.value = text;
+    input.size = width;
+    return input;
+}
+
+function makeDisabledInput(text, width) {
+    let input = document.createElement("input");
+    input.value = text;
+    input.size = width;
+    input.disabled = true;
+    return input;
+}
+
+onload = () => addTopic()
+
+
 </script>
 </head>
 <body>
@@ -18,23 +197,14 @@
         <th></th>
         <th></th>
     </thead>
-    <tbody>
-        <td><button id="remove1" tabindex="-1">&ndash;</button></td>
-        <td><button id="up1" tabindex="-1">&uparrow;</button></td>
-        <td><button id="down1" tabindex="-1">&downarrow;</button></td>
-        <td><input id="topic1"></td>
-        <td><input id="alloc1" size="8"></td>
-        <td><input id="used1" size="8" disabled></td>
-        <td><input id="remaining1" size="8" disabled></td>
-        <td><button id="start1" tabindex="-1">Start</button></td>
-        <td><button id="pause1" tabindex="-1">Pause</button></td>
-        <td></td>
+    <tbody id="tbody">
     </tbody>
     <tfoot>
         <td></td>
         <td></td>
         <td></td>
-        <td><button id="add-topic">&plus;</button></td>
+        <td><button id="add-topic" onclick="addTopicAndFocus()">&plus;</button></td>
+        <td><input id="total-allocated" disabled size="6"></td>
     </tfoot>
 </table>
 </body>
