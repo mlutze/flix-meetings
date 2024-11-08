@@ -160,6 +160,7 @@ function makeNewRow() {
     allocated.className = ALLOC_CLASS;
     let used = makeInput(formatTime(0), TIME_WIDTH);
     used.className = USED_CLASS;
+    used.tabIndex = "-1";
     let remaining = makeDisabledInput(formatTime(DEFAULT_ALLOCATION), TIME_WIDTH);
     remaining.className = REMAINING_CLASS;
 
