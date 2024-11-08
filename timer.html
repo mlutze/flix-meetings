@@ -11,6 +11,8 @@ DEFAULT_ALLOCATION = 600;
 RUNNINGTIMER = null;
 
 ALLOC_CLASS = "alloc";
+USED_CLASS = "used";
+REMAINING_CLASS = "remaining";
 
 function randomId(prefix) {
     return prefix + Math.floor((Math.random() * 100000));
@@ -32,7 +34,18 @@ function moveRowDown(row) {
 }
 
 function pauseTime() {
+    // stop the current timer
     window.clearInterval(RUNNINGTIMER);
+
+    // reenable editing the allocation and used fields
+    let allocs = document.getElementsByClassName(ALLOC_CLASS);
+    for (let node of allocs) {
+        node.disabled = false;
+    }
+    let useds = document.getElementsByClassName(USED_CLASS);
+    for (let node of useds) {
+        node.disabled = false;
+    }
 }
 
 function tick(used) {
@@ -41,18 +54,22 @@ function tick(used) {
     used.value = formatTime(usedSecNew);
 }
 
-function getTotalAlloc() {
-    let allocs = document.getElementsByClassName(ALLOC_CLASS);
+function getTotalTime(clazz) {
+    let times = document.getElementsByClassName(clazz);
     let sum = 0;
-    for (alloc of allocs) {
-        sum += parseTime(alloc.value);
+    for (time of times) {
+        sum += parseTime(time.value);
     }
     return sum;
 }
 
 function recalcTotalTime() {
-    let totalAllocSec = getTotalAlloc();
+    let totalAllocSec = getTotalTime(ALLOC_CLASS);
+    let totalUsedSec = getTotalTime(USED_CLASS);
+    let totalRemainingSec = getTotalTime(REMAINING_CLASS);
     document.getElementById("total-allocated").value = formatTime(totalAllocSec);
+    document.getElementById("total-used").value = formatTime(totalUsedSec);
+    document.getElementById("total-remaining").value = formatTime(totalRemainingSec);
 }
 
 function recalcTimes(allocated, used, remaining) {
@@ -67,6 +84,7 @@ function recalcTimes(allocated, used, remaining) {
 }
 
 function startTime(allocated, used, remaining) {
+    // start a timer to tick up the used time
     window.clearInterval(RUNNINGTIMER);
     RUNNINGTIMER = window.setInterval(
         () => {
@@ -75,6 +93,10 @@ function startTime(allocated, used, remaining) {
         },
         1000
     );
+
+    // disable the allocated and used fields
+    allocated.disabled = true;
+    used.disabled = true;
 }
 
 function parseTime(string) {
@@ -136,8 +158,10 @@ function makeNewRow() {
 
     let allocated = makeInput(formatTime(DEFAULT_ALLOCATION), TIME_WIDTH);
     allocated.className = ALLOC_CLASS;
-    let used = makeDisabledInput(formatTime(0), TIME_WIDTH);
+    let used = makeInput(formatTime(0), TIME_WIDTH);
+    used.className = USED_CLASS;
     let remaining = makeDisabledInput(formatTime(DEFAULT_ALLOCATION), TIME_WIDTH);
+    remaining.className = REMAINING_CLASS;
 
     allocated.onchange = () => recalcTimes(allocated, used, remaining);
 
@@ -205,6 +229,8 @@ onload = () => addTopic()
         <td></td>
         <td><button id="add-topic" onclick="addTopicAndFocus()">&plus;</button></td>
         <td><input id="total-allocated" disabled size="6"></td>
+        <td><input id="total-used" disabled size="6"></td>
+        <td><input id="total-remaining" disabled size="6"></td>
     </tfoot>
 </table>
 </body>
