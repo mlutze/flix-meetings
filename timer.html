@@ -66,7 +66,7 @@ function getTotalTime(clazz) {
 function recalcTotalTime() {
     let totalAllocSec = getTotalTime(ALLOC_CLASS);
     let totalUsedSec = getTotalTime(USED_CLASS);
-    let totalRemainingSec = getTotalTime(REMAINING_CLASS);
+    let totalRemainingSec = totalAllocSec - totalUsedSec;
     document.getElementById("total-allocated").value = formatTime(totalAllocSec);
     document.getElementById("total-used").value = formatTime(totalUsedSec);
     document.getElementById("total-remaining").value = formatTime(totalRemainingSec);
@@ -165,6 +165,7 @@ function makeNewRow() {
     remaining.className = REMAINING_CLASS;
 
     allocated.onchange = () => recalcTimes(allocated, used, remaining);
+    used.onchange = () => recalcTimes(allocated, used, remaining);
 
     tr.appendChild(makeSimpleTd(allocated));
     tr.appendChild(makeSimpleTd(used));
